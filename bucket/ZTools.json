@@ -1,10 +1,16 @@
 {
-  "version": "2.2.1",
+  "version": "2.3.1",
   "description": "ZToolsCenter 综合工具箱",
   "homepage": "https://github.com",
   "license": "Freeware",
-  "url": "https://gh-proxy.com/github.com/ZToolsCenter/ZTools/releases/download/v2.2.1/ZTools-2.2.1-win-x64.zip",
+  "url": "https://gh-proxy.com/github.com/ZToolsCenter/ZTools/releases/download/v2.3.1/ZTools-2.3.1-win-x64.zip",
   "bin": "ZTools.exe",
+  "shortcuts": [
+    [
+      "ZTools.exe",
+      "ZTools"
+    ]
+  ],
   "checkver": "github",
   "autoupdate": {
     "url": "https://github.com/ZToolsCenter/ZTools/releases/download/v$version/ZTools-$version-win-x64.zip"
