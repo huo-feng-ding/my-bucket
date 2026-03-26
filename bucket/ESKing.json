@@ -1,9 +1,9 @@
 {
-  "version": "0.30",
+  "version": "0.31",
   "description": "ESKing - Enhanced screenshot tool",
   "homepage": "https://github.com/Bronya0/ES-King",
   "license": "Freeware",
-  "url": "https://gh-proxy.com/github.com/Bronya0/ES-King/releases/download/v0.30/ES-King-v0.30-windows-x64.7z",
+  "url": "https://github.com/Bronya0/ES-King/releases/download/v0.31/ES-King-v0.31-windows-x64.7z",
   "bin": "ES-King.exe",
   "shortcuts": [
     [

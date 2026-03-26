@@ -2,7 +2,7 @@ name: Check for app updates
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天午夜运行
+    - cron: '0 0 * * *' # 每天0点运行（UTC）
   workflow_dispatch:
 
 permissions:
@@ -36,8 +36,21 @@ jobs:
             $autoupdate = $json.autoupdate
             
             if ($checkver -eq "github") {
-              # 从homepage提取repo，如 https://github.com/owner/repo
-              $repo = $homepage -replace "https://github.com/", ""
+              if (-not $homepage -or -not ($homepage -match '^https?://(www\.)?github\.com/[^/]+/[^/]+')) {
+                Write-Host "Skipped $($_.BaseName): homepage is not a GitHub repo URL: $homepage"
+                continue
+              }
+
+              # 从homepage 提取 repo，如 https://github.com/owner/repo 或 https://github.com/owner/repo/
+              $repo = $homepage -replace '^https?://(www\.)?github\.com/', ''
+              $repo = $repo.TrimEnd('/')
+              $parts = $repo.Split('/')
+              if ($parts.Count -lt 2) {
+                Write-Host "Skipped $($_.BaseName): invalid GitHub repo path extracted: $repo"
+                continue
+              }
+              $repo = "$($parts[0])/$($parts[1])"
+
               $apiUrl = "https://api.github.com/repos/$repo/releases/latest"
               try {
                 $response = Invoke-RestMethod -Uri $apiUrl -Method Get
