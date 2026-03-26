@@ -1,0 +1,70 @@
+name: Check for app updates
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天午夜运行
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-updates:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Scoop
+        run: |
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+          irm get.scoop.sh | iex
+          $env:PATH = "$env:USERPROFILE\scoop\shims;" + $env:PATH
+          echo "$env:USERPROFILE\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        shell: powershell
+
+      - name: Check for updates
+        shell: pwsh
+        run: |
+          $updated = $false
+          Get-ChildItem bucket/*.json | ForEach-Object {
+            $jsonPath = $_.FullName
+            $json = Get-Content $jsonPath | ConvertFrom-Json
+            $currentVersion = $json.version
+            $checkver = $json.checkver
+            $homepage = $json.homepage
+            $autoupdate = $json.autoupdate
+            
+            if ($checkver -eq "github") {
+              # 从homepage提取repo，如 https://github.com/owner/repo
+              $repo = $homepage -replace "https://github.com/", ""
+              $apiUrl = "https://api.github.com/repos/$repo/releases/latest"
+              try {
+                $response = Invoke-RestMethod -Uri $apiUrl -Method Get
+                $latestVersion = $response.tag_name -replace "^v", ""  # 移除v前缀
+                if ($latestVersion -and $latestVersion -ne $currentVersion) {
+                  Write-Host "Updating $($_.BaseName) from $currentVersion to $latestVersion"
+                  $json.version = $latestVersion
+                  if ($autoupdate.url) {
+                    $json.url = $autoupdate.url -replace '\$version', $latestVersion
+                  }
+                  $json | ConvertTo-Json -Depth 10 | Set-Content $jsonPath -Encoding UTF8
+                  $updated = $true
+                }
+              } catch {
+                Write-Host "Failed to check $($_.BaseName): $_"
+              }
+            }
+          }
+
+          if ($updated) {
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add bucket/
+            git commit -m "Update app versions"
+            git push
+          } else {
+            Write-Host "No updates found"
+          }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
