@@ -1,9 +1,9 @@
 {
-  "version": "0.31",
+  "version": "0.35",
   "description": "ESKing - Enhanced screenshot tool",
   "homepage": "https://github.com/Bronya0/ES-King",
   "license": "Freeware",
-  "url": "https://github.com/Bronya0/ES-King/releases/download/v0.31/ES-King-v0.31-windows-x64.7z",
+  "url": "https://github.com/Bronya0/ES-King/releases/download/v0.35/ES-King-v0.35-windows-x64.7z",
   "bin": "ES-King.exe",
   "shortcuts": [
     [
